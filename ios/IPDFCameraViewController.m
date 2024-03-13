@@ -234,21 +234,25 @@
 {
     _isStopped = NO;
 
-    [self.captureSession startRunning];
-
-    float detectionRefreshRate = _detectionRefreshRateInMS;
-    CGFloat detectionRefreshRateInSec = detectionRefreshRate/100;
-
-    if (_lastDetectionRate != _detectionRefreshRateInMS) {
-        if (_borderDetectTimeKeeper) {
-            [_borderDetectTimeKeeper invalidate];
-        }
-        _borderDetectTimeKeeper = [NSTimer scheduledTimerWithTimeInterval:detectionRefreshRateInSec target:self selector:@selector(enableBorderDetectFrame) userInfo:nil repeats:YES];
-    }
-
-    [self hideGLKView:NO completion:nil];
-
-    _lastDetectionRate = _detectionRefreshRateInMS;
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        [self.captureSession startRunning];
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            floatdetectionRefreshRate = self->_detectionRefreshRateInMS;
+            CGFloatdetectionRefreshRateInSec = detectionRefreshRate/100;
+        
+            if (self->_lastDetectionRate != self->_detectionRefreshRateInMS) {
+                if(self->_borderDetectTimeKeeper) {
+                    [self->_borderDetectTimeKeeperinvalidate];
+                }
+                self->_borderDetectTimeKeeper= [NSTimerscheduledTimerWithTimeInterval:detectionRefreshRateInSec target:selfselector:@selector(enableBorderDetectFrame) userInfo:nilrepeats:YES];
+            }
+        
+            [self hideGLKView:NO completion:nil];
+        
+            self->_lastDetectionRate = self->_detectionRefreshRateInMS;
+        });
+    });
 }
 
 - (void)stop
