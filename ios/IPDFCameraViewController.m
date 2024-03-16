@@ -238,14 +238,14 @@
         [self.captureSession startRunning];
         
         dispatch_async(dispatch_get_main_queue(), ^{
-            floatdetectionRefreshRate = self->_detectionRefreshRateInMS;
-            CGFloatdetectionRefreshRateInSec = detectionRefreshRate/100;
-        
+            float detectionRefreshRate = self->_detectionRefreshRateInMS; // Korrigiert: Leerzeichen hinzugefügt
+            CGFloat detectionRefreshRateInSec = detectionRefreshRate / 100.0; // Korrigiert: Division durch 100 für Sekunden und Punkt für Fließkommadivision
+            
             if (self->_lastDetectionRate != self->_detectionRefreshRateInMS) {
-                if(self->_borderDetectTimeKeeper) {
-                    [self->_borderDetectTimeKeeperinvalidate];
+                if (self->_borderDetectTimeKeeper) {
+                    [self->_borderDetectTimeKeeper invalidate]; // Korrigiert: Leerzeichen und Schreibweise von "invalidate"
                 }
-                self->_borderDetectTimeKeeper= [NSTimerscheduledTimerWithTimeInterval:detectionRefreshRateInSec target:selfselector:@selector(enableBorderDetectFrame) userInfo:nilrepeats:YES];
+                self->_borderDetectTimeKeeper = [NSTimer scheduledTimerWithTimeInterval:detectionRefreshRateInSec target:self selector:@selector(enableBorderDetectFrame) userInfo:nil repeats:YES]; // Korrigiert: Leerzeichen und Schreibweise
             }
         
             [self hideGLKView:NO completion:nil];
