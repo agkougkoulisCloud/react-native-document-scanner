@@ -1,11 +1,10 @@
-Identical to @Andycapn/react-native-document-scanner, but with an enhancement that moves the iOS image capture process to a background thread for improved stability.
-
 ![Demo gif](https://raw.githubusercontent.com/Michaelvilleneuve/react-native-document-scanner/master/images/demo.gif)
 
-# `@Andycapn/react-native-document-scanner`
+# `@ertan95/react-native-document-scanner`
 
 [![CircleCI Status](https://img.shields.io/circleci/project/github/Andycapn/react-native-document-scanner/master.svg)](https://circleci.com/gh/Andycapn/workflows/react-native-document-scanner/tree/master) ![Supports Android and iOS](https://img.shields.io/badge/platforms-android%20|%20ios%20-lightgrey.svg) ![MIT License](https://img.shields.io/npm/l/@react-native-community/netinfo.svg)
 
+Identical to @Andycapn/react-native-document-scanner, but with an enhancement that moves the iOS image capture process to a background thread for improved stability.
 Live document detection library. Returns either a URI of the captured image, allowing you to easily store it or use it as you wish!
 
 - Live detection
@@ -21,13 +20,13 @@ Version `>=2.0.3` is thinking to work with React Native >= 0.70
 Install the library using either yarn:
 
 ```sh
-yarn add @Andycapn/react-native-document-scanner`
+yarn add @ertan95/react-native-document-scanner`
 ```
 
 or npm:
 
 ```sh
-npm install @Andycapn/react-native-document-scanner --save
+npm install @ertan95/react-native-document-scanner --save
 ```
 
 Remember, this library uses your device's camera, **it cannot run on a simulator** and you must request **camera permission** by your own.
@@ -46,7 +45,7 @@ If you do not have it already in your project, you must link openCV in your `set
 
 ```java
 include ':openCVLibrary310'
-project(':openCVLibrary310').projectDir = new File(rootProject.projectDir,'../node_modules/@Andycapn/react-native-document-scanner/android/openCVLibrary310')
+project(':openCVLibrary310').projectDir = new File(rootProject.projectDir,'../node_modules/@ertan95/react-native-document-scanner/android/openCVLibrary310')
 ```
 
 #### In android/app/src/main/AndroidManifest.xml
@@ -75,7 +74,7 @@ Add Camera permissions request:
 import React, { Component, useRef } from "react"
 import { View, Image } from "react-native"
 
-import DocumentScanner from "@Andycapn/react-native-document-scanner"
+import DocumentScanner from "@ertan95/react-native-document-scanner"
 
 function YourComponent(props) {
   return (
@@ -94,7 +93,7 @@ function YourComponent(props) {
 }
 ```
 
-Full example in [example folder](https://github.com/Andycapn/react-native-document-scanner/tree/master/example).
+Full example in [example folder](https://github.com/ertan95/react-native-document-scanner/tree/master/example).
 
 ## Properties
 
