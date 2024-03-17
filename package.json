@@ -1,7 +1,7 @@
 {
-  "name": "@andycapn/react-native-document-scanner",
-  "version": "2.0.3",
-  "description": "Scan documents, automatic border detection, automatic crop",
+  "name": "@ertan95/react-native-document-scanner",
+  "version": "2.0.4",
+  "description": "Scan documents, automatic border detection, automatic crop. Enhanced iOS stability by moving image capture to a background thread.",
   "main": "lib/module/index.js",
   "types": "lib/typescript/index.d.ts",
   "files": [
@@ -38,14 +38,14 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/Andycapn/react-native-document-scanner"
+    "url": "https://github.com/ertan95/react-native-document-scanner"
   },
-  "author": "Andycapn (Forked from: Woonivers (https://woonivers.com))",
+  "author": "ertan95 (Forked from: Woonivers (https://woonivers.com))",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Andycapn/react-native-document-scanner/issues"
+    "url": "https://github.com/ertan95/react-native-document-scanner/issues"
   },
-  "homepage": "https://github.com/Andycapn/react-native-document-scanner#readme",
+  "homepage": "https://github.com/ertan95/react-native-document-scanner#readme",
   "devDependencies": {
     "@babel/runtime": "^7.5.5",
     "@commitlint/config-conventional": "^8.0.0",
