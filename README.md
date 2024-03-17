@@ -1,3 +1,5 @@
+Identical to @Andycapn/react-native-document-scanner, but with an enhancement that moves the iOS image capture process to a background thread for improved stability.
+
 ![Demo gif](https://raw.githubusercontent.com/Michaelvilleneuve/react-native-document-scanner/master/images/demo.gif)
 
 # `@Andycapn/react-native-document-scanner`
