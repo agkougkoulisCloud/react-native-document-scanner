@@ -4,7 +4,8 @@
 
 [![CircleCI Status](https://img.shields.io/circleci/project/github/Andycapn/react-native-document-scanner/master.svg)](https://circleci.com/gh/Andycapn/workflows/react-native-document-scanner/tree/master) ![Supports Android and iOS](https://img.shields.io/badge/platforms-android%20|%20ios%20-lightgrey.svg) ![MIT License](https://img.shields.io/npm/l/@react-native-community/netinfo.svg)
 
-Identical to @Andycapn/react-native-document-scanner, but with an enhancement that moves the iOS image capture process to a background thread for improved stability.
+Identical to @Andycapn/react-native-document-scanner, but with enhancements that move the iOS image capture process to a background thread for improved stability, and include a fix for blurry images on iPhone Pro models by choosing the correct lens for optimal clarity and performance.
+
 Live document detection library. Returns either a URI of the captured image, allowing you to easily store it or use it as you wish!
 
 - Live detection
