@@ -93,64 +93,102 @@
     [EAGLContext setCurrentContext:self.context];
 }
 
-- (void)setupCameraView
-{
+- (void)setupCameraView {
     [self createGLKView];
 
+    AVCaptureDeviceDiscoverySession *discoverySession = [AVCaptureDeviceDiscoverySession discoverySessionWithDeviceTypes:@[AVCaptureDeviceTypeBuiltInWideAngleCamera, AVCaptureDeviceTypeBuiltInUltraWideCamera, AVCaptureDeviceTypeBuiltInTelephotoCamera, AVCaptureDeviceTypeBuiltInDualCamera, AVCaptureDeviceTypeBuiltInDualWideCamera, AVCaptureDeviceTypeBuiltInTripleCamera] mediaType:AVMediaTypeVideo position:AVCaptureDevicePositionUnspecified];
+
+    NSArray *devices = discoverySession.devices;
     AVCaptureDevice *device = nil;
-    NSArray *devices = [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo];
+
+    /* Log all available cameras with their properties
     for (AVCaptureDevice *possibleDevice in devices) {
-        if (self.useFrontCam) {
+        NSLog(@"Available device: %@, Type: %@, Position: %ld", possibleDevice.localizedName, possibleDevice.deviceType, (long)possibleDevice.position);
+    }
+    */
+
+    if (self.useFrontCam) {
+        for (AVCaptureDevice *possibleDevice in devices) {
             if ([possibleDevice position] == AVCaptureDevicePositionFront) {
                 device = possibleDevice;
+                break;
             }
-        } else {
-            if ([possibleDevice position] != AVCaptureDevicePositionFront) {
+        }
+    } else {
+        // Prioritize Triple Camera for the best quality on Pro models
+        for (AVCaptureDevice *possibleDevice in devices) {
+            if ([possibleDevice.deviceType isEqualToString:AVCaptureDeviceTypeBuiltInTripleCamera]) {
                 device = possibleDevice;
+                break;
+            }
+        }
+
+        // As a fallback, look for Dual or DualWide Camera
+        if (!device) {
+            for (AVCaptureDevice *possibleDevice in devices) {
+                if ([possibleDevice.deviceType isEqualToString:AVCaptureDeviceTypeBuiltInDualCamera] || [possibleDevice.deviceType isEqualToString:AVCaptureDeviceTypeBuiltInDualWideCamera]) {
+                    device = possibleDevice;
+                    break;
+                }
+            }
+        }
+
+        // Standard back camera as the last fallback
+        if (!device) {
+            for (AVCaptureDevice *possibleDevice in devices) {
+                if ([possibleDevice.deviceType isEqualToString:AVCaptureDeviceTypeBuiltInWideAngleCamera] && [possibleDevice position] == AVCaptureDevicePositionBack) {
+                    device = possibleDevice;
+                    break;
+                }
             }
         }
     }
+
     if (!device) return;
+    
+    /*
+    NSLog(@"Selected camera: %@", device.localizedName);
+    NSLog(@"Camera type: %@", device.deviceType);
+    NSLog(@"Position: %ld", (long)device.position);
+    */
 
     self.imageDetectionConfidence = 0.0;
 
-    AVCaptureSession *session = [[AVCaptureSession alloc] init];
-    self.captureSession = session;
-    [session beginConfiguration];
+    AVCaptureSession *captureSession = [[AVCaptureSession alloc] init];
+    self.captureSession = captureSession;
+    [captureSession beginConfiguration];
     self.captureDevice = device;
 
     NSError *error = nil;
     AVCaptureDeviceInput* input = [AVCaptureDeviceInput deviceInputWithDevice:device error:&error];
-    session.sessionPreset = AVCaptureSessionPresetPhoto;
-    [session addInput:input];
+    if (error) return;
+    
+
+    captureSession.sessionPreset = AVCaptureSessionPresetPhoto;
+    [captureSession addInput:input];
 
     AVCaptureVideoDataOutput *dataOutput = [[AVCaptureVideoDataOutput alloc] init];
     [dataOutput setAlwaysDiscardsLateVideoFrames:YES];
     [dataOutput setVideoSettings:@{(id)kCVPixelBufferPixelFormatTypeKey:@(kCVPixelFormatType_32BGRA)}];
     [dataOutput setSampleBufferDelegate:self queue:dispatch_get_main_queue()];
-    [session addOutput:dataOutput];
+    [captureSession addOutput:dataOutput];
 
     self.stillImageOutput = [[AVCaptureStillImageOutput alloc] init];
-    [session addOutput:self.stillImageOutput];
+    [captureSession addOutput:self.stillImageOutput];
 
     AVCaptureConnection *connection = [dataOutput.connections firstObject];
     [connection setVideoOrientation:AVCaptureVideoOrientationPortrait];
 
-    if (device.isFlashAvailable)
-    {
+    if (device.isFlashAvailable) {
         [device lockForConfiguration:nil];
         [device setFlashMode:AVCaptureFlashModeOff];
-        [device unlockForConfiguration];
-
-        if ([device isFocusModeSupported:AVCaptureFocusModeContinuousAutoFocus])
-        {
-            [device lockForConfiguration:nil];
+        if ([device isFocusModeSupported:AVCaptureFocusModeContinuousAutoFocus]) {
             [device setFocusMode:AVCaptureFocusModeContinuousAutoFocus];
-            [device unlockForConfiguration];
         }
+        [device unlockForConfiguration];
     }
 
-    [session commitConfiguration];
+    [captureSession commitConfiguration];
 }
 
 - (void)setCameraViewType:(IPDFCameraViewType)cameraViewType
