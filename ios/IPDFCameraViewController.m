@@ -117,19 +117,9 @@
     } else {
         // Prioritize Triple Camera for the best quality on Pro models
         for (AVCaptureDevice *possibleDevice in devices) {
-            if ([possibleDevice.deviceType isEqualToString:AVCaptureDeviceTypeBuiltInTripleCamera]) {
+            if ([possibleDevice.deviceType isEqualToString:AVCaptureDeviceTypeBuiltInWideAngleCamera]) {
                 device = possibleDevice;
                 break;
-            }
-        }
-
-        // As a fallback, look for Dual or DualWide Camera
-        if (!device) {
-            for (AVCaptureDevice *possibleDevice in devices) {
-                if ([possibleDevice.deviceType isEqualToString:AVCaptureDeviceTypeBuiltInDualCamera] || [possibleDevice.deviceType isEqualToString:AVCaptureDeviceTypeBuiltInDualWideCamera]) {
-                    device = possibleDevice;
-                    break;
-                }
             }
         }
 
@@ -146,11 +136,11 @@
 
     if (!device) return;
     
-    /*
+
     NSLog(@"Selected camera: %@", device.localizedName);
     NSLog(@"Camera type: %@", device.deviceType);
     NSLog(@"Position: %ld", (long)device.position);
-    */
+
 
     self.imageDetectionConfidence = 0.0;
 
@@ -207,52 +197,72 @@
     });
 }
 
--(void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection
-{
+- (void)adjustCameraFocusAndZoomForQRCode {
+    AVCaptureDevice *device = self.captureDevice;
+    CGFloat fieldOfView = device.activeFormat.videoFieldOfView;
+    CGFloat minimumCodeSize = 60.0; // MinimumCodeSize: This variable sets the size of the object you want to scan, measured in millimeters. 
+    CGFloat previewFillPercentage = 1.0; // PreviewFillPercentage: This variable determines how much of the camera preview the object should fill, expressed as a percentage.
+
+    CGFloat minSubjectDistance = [self minSubjectDistanceForFieldOfView:fieldOfView
+                                                         minimumCodeSize:minimumCodeSize
+                                                   previewFillPercentage:previewFillPercentage];
+
+    NSError *error = nil;
+    if ([device lockForConfiguration:&error]) {
+        if (@available(iOS 15.0, *)) {
+            if (device.minimumFocusDistance > minSubjectDistance) {
+                CGFloat neededZoomFactor = device.minimumFocusDistance / minSubjectDistance;
+                device.videoZoomFactor = MAX(neededZoomFactor, device.videoZoomFactor);
+            }
+        }
+        [device unlockForConfiguration];
+    } else {
+        NSLog(@"Error locking device for configuration: %@", error);
+    }
+}
+
+- (CGFloat)minSubjectDistanceForFieldOfView:(CGFloat)fieldOfView minimumCodeSize:(CGFloat)minimumCodeSize previewFillPercentage:(CGFloat)previewFillPercentage {
+    CGFloat radians = fieldOfView / 2 * (M_PI / 180);
+    CGFloat filledCodeSize = minimumCodeSize / previewFillPercentage;
+    return filledCodeSize / tan(radians);
+}
+
+- (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection {
     if (self.forceStop) return;
     if (_isStopped || self.isCapturing || !CMSampleBufferIsValid(sampleBuffer)) return;
 
-    CVPixelBufferRef pixelBuffer = (CVPixelBufferRef)CMSampleBufferGetImageBuffer(sampleBuffer);
+    [self adjustCameraFocusAndZoomForQRCode];
 
+    CVPixelBufferRef pixelBuffer = (CVPixelBufferRef)CMSampleBufferGetImageBuffer(sampleBuffer);
     CIImage *image = [CIImage imageWithCVPixelBuffer:pixelBuffer];
 
-    if (self.cameraViewType != IPDFCameraViewTypeNormal)
-    {
+    if (self.cameraViewType != IPDFCameraViewTypeNormal) {
         image = [self filteredImageUsingEnhanceFilterOnImage:image];
-    }
-    else
-    {
+    } else {
         image = [self filteredImageUsingContrastFilterOnImage:image];
     }
 
-    if (self.isBorderDetectionEnabled)
-    {
-        if (_borderDetectFrame)
-        {
+    if (self.isBorderDetectionEnabled) {
+        if (_borderDetectFrame) {
             _borderDetectLastRectangleFeature = [self biggestRectangleInRectangles:[[self highAccuracyRectangleDetector] featuresInImage:image]];
             _borderDetectFrame = NO;
         }
 
-        if (_borderDetectLastRectangleFeature)
-        {
+        if (_borderDetectLastRectangleFeature) {
             self.imageDetectionConfidence += .5;
-
             image = [self drawHighlightOverlayForPoints:image topLeft:_borderDetectLastRectangleFeature.topLeft topRight:_borderDetectLastRectangleFeature.topRight bottomLeft:_borderDetectLastRectangleFeature.bottomLeft bottomRight:_borderDetectLastRectangleFeature.bottomRight];
-        }
-        else
-        {
+        } else {
             self.imageDetectionConfidence = 0.0f;
         }
     }
 
-    if (self.context && _coreImageContext)
-    {
+    if (self.context && _coreImageContext) {
         [_coreImageContext drawImage:image inRect:self.bounds fromRect:image.extent];
         [self.context presentRenderbuffer:GL_RENDERBUFFER];
-
         [_glkView setNeedsDisplay];
     }
 }
+
 
 - (void)enableBorderDetectFrame
 {
