@@ -39,16 +39,6 @@ CocoaPods on iOS needs this extra step:
 ```sh
 cd ios && pod install && cd ..
 ```
-
-### Android Only
-
-If you do not have it already in your project, you must link openCV in your `settings.gradle` file
-
-```java
-include ':openCVLibrary310'
-project(':openCVLibrary310').projectDir = new File(rootProject.projectDir,'../node_modules/@ertan95/react-native-document-scanner/android/openCVLibrary310')
-```
-
 #### In android/app/src/main/AndroidManifest.xml
 
 Change manifest header to avoid "Manifest merger error". After you add `xmlns:tools="http://schemas.android.com/tools"` should look like this:
