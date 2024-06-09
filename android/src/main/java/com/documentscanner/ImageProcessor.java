@@ -150,7 +150,7 @@ public class ImageProcessor extends Handler {
         sd.originalSize = inputRgba.size();
         Quadrilateral quad = getQuadrilateral(contours, sd.originalSize);
 
-        double ratio = sd.originalSize.height / 500;
+        double ratio = sd.originalSize.height / 1000;
         sd.heightWithRatio = Double.valueOf(sd.originalSize.width / ratio).intValue();
         sd.widthWithRatio = Double.valueOf(sd.originalSize.height / ratio).intValue();
 
@@ -200,7 +200,7 @@ public class ImageProcessor extends Handler {
 
             Point[] rescaledPoints = new Point[4];
 
-            double ratio = inputRgba.size().height / 500;
+            double ratio = inputRgba.size().height / 1000;
 
             for (int i = 0; i < 4; i++) {
                 int x = Double.valueOf(quad.points[i].x * ratio).intValue();
@@ -262,7 +262,7 @@ public class ImageProcessor extends Handler {
 
     private Quadrilateral getQuadrilateral(ArrayList<MatOfPoint> contours, Size srcSize) {
 
-        double ratio = srcSize.height / 500;
+        double ratio = srcSize.height / 1000;
         int height = Double.valueOf(srcSize.height / ratio).intValue();
         int width = Double.valueOf(srcSize.width / ratio).intValue();
         Size size = new Size(width, height);
@@ -351,13 +351,13 @@ public class ImageProcessor extends Handler {
     }
 
     private void enhanceDocument(Mat src) {
-        Imgproc.cvtColor(src, src, Imgproc.COLOR_RGBA2GRAY);
+        //Imgproc.cvtColor(src, src, Imgproc.COLOR_RGBA2GRAY);
         src.convertTo(src, CvType.CV_8UC1, colorGain, colorBias);
     }
 
     private Mat fourPointTransform(Mat src, Point[] pts) {
 
-        double ratio = src.size().height / 500;
+        double ratio = src.size().height / 1000;
 
         Point tl = pts[0];
         Point tr = pts[1];
@@ -398,7 +398,7 @@ public class ImageProcessor extends Handler {
         Mat cannedImage;
         Mat resizedImage;
 
-        double ratio = src.size().height / 500;
+        double ratio = src.size().height / 1000;
         int height = Double.valueOf(src.size().height / ratio).intValue();
         int width = Double.valueOf(src.size().width / ratio).intValue();
         Size size = new Size(width, height);
