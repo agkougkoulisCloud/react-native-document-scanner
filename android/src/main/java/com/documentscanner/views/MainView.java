@@ -52,6 +52,10 @@ public class MainView extends FrameLayout {
         view.setOnProcessingListener(listener);
     }
 
+    public void setOnCameraReadyListener(OpenNoteCameraView.OnCameraReadyListener listener) {
+        view.setOnCameraReadyListener(listener);
+    }
+
     public void setOverlayColor(String rgbaColor) {
         view.setOverlayColor(rgbaColor);
     }

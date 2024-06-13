@@ -1,6 +1,7 @@
 package com.documentscanner;
 
 import android.app.Activity;
+import android.util.Log;
 
 import com.documentscanner.views.MainView;
 import com.documentscanner.views.OpenNoteCameraView;
@@ -10,11 +11,14 @@ import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
+import com.facebook.react.common.MapBuilder;
 
+import java.util.Map;
 import javax.annotation.Nullable;
 
 public class DocumentScannerViewManager extends ViewGroupManager<MainView> {
 
+    private static final String TAG = "DocumentScannerViewManager";
     private static final String REACT_CLASS = "RNPdfScanner";
     private MainView view = null;
 
@@ -40,11 +44,28 @@ public class DocumentScannerViewManager extends ViewGroupManager<MainView> {
             }
         });
 
+        view.setOnCameraReadyListener(new OpenNoteCameraView.OnCameraReadyListener() {
+            @Override
+            public void onCameraReady(WritableMap data) {
+                dispatchEvent(reactContext, "onDeviceSetup", data);
+            }
+        });
+
         return view;
     }
 
     private void dispatchEvent(ReactContext reactContext, String eventName, @Nullable WritableMap params) {
-        reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(eventName, params);
+        reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(eventName, params.copy());
+        Log.d(TAG, "dispatchEvent: " + eventName + " " + params);
+    }
+
+    @Override
+    public Map<String, Object> getExportedCustomDirectEventTypeConstants() {
+        return MapBuilder.<String, Object>builder()
+            .put("onPictureTaken", MapBuilder.of("registrationName", "onPictureTaken"))
+            .put("onProcessingChange", MapBuilder.of("registrationName", "onProcessingChange"))
+            .put("onDeviceSetup", MapBuilder.of("registrationName", "onDeviceSetup"))
+            .build();
     }
 
     @ReactProp(name = "documentAnimation", defaultBoolean = false)
@@ -91,5 +112,4 @@ public class DocumentScannerViewManager extends ViewGroupManager<MainView> {
     public void setContrast(MainView view, double contrast) {
         view.setContrast(contrast);
     }
-
 }

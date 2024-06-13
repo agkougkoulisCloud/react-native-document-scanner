@@ -63,11 +63,19 @@ Add Camera permissions request:
 
 ```javascript
 import React, { Component, useRef } from "react"
-import { View, Image } from "react-native"
+import { View, Image, NativeModules } from "react-native"
 
 import DocumentScanner from "@ertan95/react-native-document-scanner"
 
 function YourComponent(props) {
+  const { RNPdfScanner } = NativeModules;
+  const pdfScannerEmitter = new NativeEventEmitter(RNPdfScanner);
+
+  pdfScannerEmitter.addListener('onDeviceSetup', (resolution) => {
+    console.log('Camera resolution:', resolution);
+    // set camera resolution width, height in styles.scanne on start up to avoid scanner disortion
+  });
+
   return (
     <View>
       <DocumentScanner

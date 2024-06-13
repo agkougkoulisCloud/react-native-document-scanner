@@ -84,6 +84,7 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
 
     private OnScannerListener listener = null;
     private OnProcessingListener processingListener = null;
+    private OnCameraReadyListener cameraReadyListener = null;
 
     public interface OnScannerListener {
         void onPictureTaken(WritableMap path);
@@ -91,6 +92,10 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
 
     public interface OnProcessingListener {
         void onProcessingChange(WritableMap path);
+    }
+
+    public interface OnCameraReadyListener {
+        void onCameraReady(WritableMap path);
     }
 
     public void setOnScannerListener(OnScannerListener listener) {
@@ -107,6 +112,14 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
 
     public void removeOnProcessingListener() {
         this.processingListener = null;
+    }
+
+    public void setOnCameraReadyListener(OnCameraReadyListener listener) {
+        this.cameraReadyListener = listener;
+    }
+
+    public void removeOnCameraReadyListener() {
+        this.cameraReadyListener = null;
     }
 
     public OpenNoteCameraView(Context context, AttributeSet attrs) {
@@ -353,12 +366,20 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
 
             mHud.getLayoutParams().height = previewHeight;
         }
-
-
+        
+        
         Size maxRes = getMaxPictureResolution(previewRatio);
         if (maxRes != null) {
             param.setPictureSize(maxRes.width, maxRes.height);
             Log.d(TAG, "max supported picture resolution: " + maxRes.width + "x" + maxRes.height);
+
+            if (this.cameraReadyListener != null) {
+                WritableMap map = new WritableNativeMap();
+                map.putInt("width", maxRes.width);
+                map.putInt("height", maxRes.height);
+                Log.d(TAG, "Camera resolution: " + maxRes.width + "x" + maxRes.height);
+                this.cameraReadyListener.onCameraReady(map);
+            }
         }
 
         PackageManager pm = mActivity.getPackageManager();
