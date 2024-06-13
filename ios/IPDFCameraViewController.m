@@ -7,7 +7,7 @@
 //
 
 #import "IPDFCameraViewController.h"
-
+#import "DocumentScannerView.h"
 #import <React/RCTInvalidating.h>
 #import <AVFoundation/AVFoundation.h>
 #import <CoreMedia/CoreMedia.h>
@@ -176,6 +176,15 @@
             [device setFocusMode:AVCaptureFocusModeContinuousAutoFocus];
         }
         [device unlockForConfiguration];
+    }
+
+    // Trigger onDeviceSetup event
+    if (self.onDeviceSetup) {
+        NSDictionary *resolution = @{
+            @"width": @(self.captureDevice.activeFormat.highResolutionStillImageDimensions.width),
+            @"height": @(self.captureDevice.activeFormat.highResolutionStillImageDimensions.height)
+        };
+        self.onDeviceSetup(@{@"resolution": resolution});
     }
 
     [captureSession commitConfiguration];
