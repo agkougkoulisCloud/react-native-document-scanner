@@ -1,9 +1,10 @@
+/* eslint-disable complexity */
 import React from 'react'
 import {
+  DeviceEventEmitter,
+  EmitterSubscription,
   findNodeHandle,
-  NativeEventEmitter,
   NativeModules,
-  NativeSyntheticEvent,
   Platform,
   requireNativeComponent,
   ViewStyle
@@ -20,16 +21,28 @@ export interface PictureTaken {
   height: number;
 }
 
-export interface CameraResolution {
-  width: number;
-  height: number;
+/**
+ * TODO: Change to something like this
+interface PictureTaken {
+  uri: string;
+  base64?: string;
+  width?: number; // modify to get it
+  height?: number; // modify to get it
+  rectangleCoordinates?: object;
+  initial: {
+    uri: string;
+    base64?: string;
+    width: number; // modify to get it
+    height: number; // modify to get it
+  };
 }
+ */
 
 interface PdfScannerProps {
-  onPictureTaken?: (event: NativeSyntheticEvent<PictureTaken>) => void;
-  onRectangleDetect?: (event: NativeSyntheticEvent<any>) => void;
+  onPictureTaken?: (event: any) => void;
+  onRectangleDetect?: (event: any) => void;
+  onDeviceSetup?: (event: any) => void;
   onProcessing?: () => void;
-  onDeviceSetup?: (event: NativeSyntheticEvent<CameraResolution>) => void;
   quality?: number;
   overlayColor?: number | string;
   enableTorch?: boolean;
@@ -50,28 +63,23 @@ interface PdfScannerProps {
 }
 
 class PdfScanner extends React.Component<PdfScannerProps> {
-  private eventEmitter = new NativeEventEmitter(ScannerManager);
+  private onPictureTaken: EmitterSubscription | undefined;
+  private onProcessingChange: EmitterSubscription | undefined;
+  private onDeviceSetup: EmitterSubscription | undefined;
 
-  private onPictureTakenListener: any;
-  private onProcessingListener: any;
-  private onDeviceSetupListener: any;
-
-  sendOnPictureTakenEvent (event: NativeSyntheticEvent<PictureTaken>) {
-    if (this.props.onPictureTaken) {
-      this.props.onPictureTaken(event)
-    }
+  sendOnPictureTakenEvent (event: any) {
+    if (!this.props.onPictureTaken) return null
+    return this.props.onPictureTaken(event.nativeEvent)
   }
 
-  sendOnRectangleDetectEvent (event: NativeSyntheticEvent<any>) {
-    if (this.props.onRectangleDetect) {
-      this.props.onRectangleDetect(event)
-    }
+  sendOnRectangleDetectEvent (event: any) {
+    if (!this.props.onRectangleDetect) return null
+    return this.props.onRectangleDetect(event.nativeEvent)
   }
 
-  sendOnDeviceSetupEvent (event: NativeSyntheticEvent<CameraResolution>) {
-    if (this.props.onDeviceSetup) {
-      this.props.onDeviceSetup(event)
-    }
+  sendOnDeviceSetupEvent (event: any) {
+    if (!this.props.onDeviceSetup) return null
+    return this.props.onDeviceSetup(event.nativeEvent)
   }
 
   getImageQuality () {
@@ -85,13 +93,16 @@ class PdfScanner extends React.Component<PdfScannerProps> {
     if (Platform.OS === 'android') {
       const { onPictureTaken, onProcessing, onDeviceSetup } = this.props
       if (onPictureTaken) {
-        this.onPictureTakenListener = this.eventEmitter.addListener('onPictureTaken', this.sendOnPictureTakenEvent.bind(this))
+        this.onPictureTaken = DeviceEventEmitter.addListener('onPictureTaken', onPictureTaken)
       }
       if (onProcessing) {
-        this.onProcessingListener = this.eventEmitter.addListener('onProcessingChange', onProcessing)
+        this.onProcessingChange = DeviceEventEmitter.addListener(
+          'onProcessingChange',
+          onProcessing
+        )
       }
       if (onDeviceSetup) {
-        this.onDeviceSetupListener = this.eventEmitter.addListener('onDeviceSetup', this.sendOnDeviceSetupEvent.bind(this))
+        this.onDeviceSetup = DeviceEventEmitter.addListener('onDeviceSetup', onDeviceSetup)
       }
     }
   }
@@ -100,26 +111,35 @@ class PdfScanner extends React.Component<PdfScannerProps> {
     if (Platform.OS === 'android') {
       if (this.props.onPictureTaken !== prevProps.onPictureTaken) {
         if (prevProps.onPictureTaken) {
-          this.onPictureTakenListener && this.onPictureTakenListener.remove()
+          this.onPictureTaken && this.onPictureTaken.remove()
         }
         if (this.props.onPictureTaken) {
-          this.onPictureTakenListener = this.eventEmitter.addListener('onPictureTaken', this.sendOnPictureTakenEvent.bind(this))
+          this.onPictureTaken = DeviceEventEmitter.addListener(
+            'onPictureTaken',
+            this.props.onPictureTaken
+          )
         }
       }
       if (this.props.onProcessing !== prevProps.onProcessing) {
         if (prevProps.onProcessing) {
-          this.onProcessingListener && this.onProcessingListener.remove()
+          this.onProcessingChange && this.onProcessingChange.remove()
         }
         if (this.props.onProcessing) {
-          this.onProcessingListener = this.eventEmitter.addListener('onProcessingChange', this.props.onProcessing)
+          this.onProcessingChange = DeviceEventEmitter.addListener(
+            'onProcessingChange',
+            this.props.onProcessing
+          )
         }
       }
       if (this.props.onDeviceSetup !== prevProps.onDeviceSetup) {
         if (prevProps.onDeviceSetup) {
-          this.onDeviceSetupListener && this.onDeviceSetupListener.remove()
+          this.onDeviceSetup && this.onDeviceSetup.remove()
         }
         if (this.props.onDeviceSetup) {
-          this.onDeviceSetupListener = this.eventEmitter.addListener('onDeviceSetup', this.sendOnDeviceSetupEvent.bind(this))
+          this.onDeviceSetup = DeviceEventEmitter.addListener(
+            'onDeviceSetup',
+            this.props.onDeviceSetup
+          )
         }
       }
     }
@@ -128,9 +148,9 @@ class PdfScanner extends React.Component<PdfScannerProps> {
   componentWillUnmount () {
     if (Platform.OS === 'android') {
       const { onPictureTaken, onProcessing, onDeviceSetup } = this.props
-      if (onPictureTaken) this.onPictureTakenListener && this.onPictureTakenListener.remove()
-      if (onProcessing) this.onProcessingListener && this.onProcessingListener.remove()
-      if (onDeviceSetup) this.onDeviceSetupListener && this.onDeviceSetupListener.remove()
+      if (onPictureTaken) this.onPictureTaken && this.onPictureTaken.remove() // DeviceEventEmitter.removeListener("onPictureTaken", onPictureTaken)
+      if (onProcessing) this.onProcessingChange && this.onProcessingChange.remove() // DeviceEventEmitter.removeListener("onProcessingChange", onProcessing)
+      if (onDeviceSetup) this.onDeviceSetup && this.onDeviceSetup.remove()
     }
   }
 
