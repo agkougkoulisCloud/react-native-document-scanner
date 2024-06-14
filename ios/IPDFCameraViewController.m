@@ -184,7 +184,7 @@
             @"width": @(self.captureDevice.activeFormat.highResolutionStillImageDimensions.width),
             @"height": @(self.captureDevice.activeFormat.highResolutionStillImageDimensions.height)
         };
-        self.onDeviceSetup(@{@"resolution": resolution});
+        self.onDeviceSetup(resolution);
     }
 
     [captureSession commitConfiguration];
