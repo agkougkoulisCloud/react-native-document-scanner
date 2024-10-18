@@ -54,11 +54,20 @@
              while rectangleFeature returns a rectangle viewed from landscape, which explains the nonsense of the mapping below.
              Sorry about that.
              */
-            id rectangleCoordinates = rectangleFeature ? @{
-                                     @"topLeft": @{ @"y": @(rectangleFeature.bottomLeft.x + 30), @"x": @(rectangleFeature.bottomLeft.y)},
-                                     @"topRight": @{ @"y": @(rectangleFeature.topLeft.x + 30), @"x": @(rectangleFeature.topLeft.y)},
-                                     @"bottomLeft": @{ @"y": @(rectangleFeature.bottomRight.x), @"x": @(rectangleFeature.bottomRight.y)},
-                                     @"bottomRight": @{ @"y": @(rectangleFeature.topRight.x), @"x": @(rectangleFeature.topRight.y)},
+            CGFloat padding = 20.0;
+             id rectangleCoordinates = rectangleFeature ? @{
+                                     @"topLeft": @{
+                                         @"y": @(rectangleFeature.bottomLeft.x + padding),
+                                         @"x": @(rectangleFeature.bottomLeft.y - padding)},
+                                     @"topRight": @{
+                                         @"y": @(rectangleFeature.topLeft.x + padding),
+                                         @"x": @(rectangleFeature.topLeft.y + padding)},
+                                     @"bottomLeft": @{
+                                         @"y": @(rectangleFeature.bottomRight.x - padding),
+                                         @"x": @(rectangleFeature.bottomRight.y - padding)},
+                                     @"bottomRight": @{
+                                         @"y": @(rectangleFeature.topRight.x - padding),
+                                         @"x": @(rectangleFeature.topRight.y + padding)}
                                      } : [NSNull null];
             if (self.useBase64) {
               self.onPictureTaken(@{

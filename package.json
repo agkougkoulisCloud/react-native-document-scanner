@@ -1,5 +1,5 @@
 {
-  "name": "@ertan95/react-native-document-scanner",
+  "name": "@cloudfin/react-native-document-scanner",
   "version": "2.1.6",
   "description": "Scan documents, automatic border detection, automatic crop. Enhanced iOS stability by moving image capture to a background thread.",
   "main": "lib/module/index.js",
@@ -36,20 +36,12 @@
     "android",
     "camera"
   ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/ertan95/react-native-document-scanner"
-  },
-  "author": "ertan95 (Forked from: Woonivers (https://woonivers.com))",
+  "author": "",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/ertan95/react-native-document-scanner/issues"
-  },
-  "homepage": "https://github.com/ertan95/react-native-document-scanner#readme",
   "devDependencies": {
     "@babel/runtime": "^7.5.5",
     "@commitlint/config-conventional": "^8.0.0",
-    "@react-native-community/bob": "^0.4.1",
+    "@react-native-community/bob": "^0.17.1",
     "@release-it/conventional-changelog": "^1.1.0",
     "@types/react": "^16.8.20",
     "@types/react-native": "^0.57.63",

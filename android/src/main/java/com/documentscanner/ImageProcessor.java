@@ -358,12 +358,22 @@ public class ImageProcessor extends Handler {
     private Mat fourPointTransform(Mat src, Point[] pts) {
 
         double ratio = src.size().height / 1000;
-
+        int padding = 20;
         Point tl = pts[0];
         Point tr = pts[1];
         Point br = pts[2];
         Point bl = pts[3];
+        tl.x -= padding;
+        tl.y -= padding;
 
+        tr.x += padding;
+        tr.y -= padding;
+
+        br.x += padding;
+        br.y += padding;
+
+        bl.x -= padding;
+        bl.y += padding;
         double widthA = Math.sqrt(Math.pow(br.x - bl.x, 2) + Math.pow(br.y - bl.y, 2));
         double widthB = Math.sqrt(Math.pow(tr.x - tl.x, 2) + Math.pow(tr.y - tl.y, 2));
 
