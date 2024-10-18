@@ -1,6 +1,6 @@
 {
   "name": "@cloudfin/react-native-document-scanner",
-  "version": "2.1.6",
+  "version": "2.2.0",
   "description": "Scan documents, automatic border detection, automatic crop. Enhanced iOS stability by moving image capture to a background thread.",
   "main": "lib/module/index.js",
   "types": "lib/typescript/index.d.ts",
@@ -88,7 +88,7 @@
       "git add"
     ],
     "*.java": [
-      "cd android && ./graldew spotlessApply",
+      "cd android && ./gradlew spotlessApply",
       "git add"
     ]
   },
